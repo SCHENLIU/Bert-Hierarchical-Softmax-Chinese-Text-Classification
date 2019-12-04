@@ -2,26 +2,27 @@
 bert+hierarchical softmax
 
 ## pretrained model
-There are three files in 
-bert模型放在 bert_pretain目录下，每个目录下都是三个文件：
+Three files are needed in /bert_pretrain:
  - pytorch_model.bin  
  - bert_config.json  
  - vocab.txt  
 
-预训练模型下载地址：  
-bert_Chinese: 模型 https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese.tar.gz  
-              词表 https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt  
-来自[这里](https://github.com/huggingface/pytorch-transformers)   
-备用：模型的网盘地址：https://pan.baidu.com/s/1qSAD5gwClq7xlgzl_4W3Pw
+All these files you can download here:
+bert_Chinese: model: https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese.tar.gz  
+              vocabulary: https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-vocab.txt  
+reference from(https://github.com/huggingface/pytorch-transformers)   
 
-解压后，按照上面说的放在对应目录下，文件名称确认无误即可。  
 
-层级分类的softmax参考：https://talbaumel.github.io/blog/softmax/
+A backup link for pretrained model：https://pan.baidu.com/s/1qSAD5gwClq7xlgzl_4W3Pw
 
-## 使用说明
-下载好预训练模型就可以跑了。
+From the site you can get a zip file, unzip it and put it in /bert_pretrain.
+
+Hierarchical softmax introduction：https://talbaumel.github.io/blog/softmax/
+
+## How to use
+Just need to download pretrained files above.
 ```
-# 训练并测试：
+# train：
 # bert
 python train_evl.py
 ```
@@ -33,7 +34,7 @@ python train_evl.py
 
 
 ## Reference
-[1] 层级分类softmax：https://talbaumel.github.io/blog/softmax/
+[1] Hierarchical softmax：https://talbaumel.github.io/blog/softmax/
 
 [2] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
 

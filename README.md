@@ -24,7 +24,7 @@ bert_Chinese: 模型 https://s3.amazonaws.com/models.huggingface.co/bert/bert-ba
 # 训练并测试：
 # bert
 python train_evl.py
-
+```
 
 
 

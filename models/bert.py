@@ -13,14 +13,14 @@ class Config(object):
     """配置参数"""
     def __init__(self, dataset):
         self.model_name = 'bert'
-        self.train_path = dataset + '/data/train_Merged1125.txt'                                # 训练集
-        self.dev_path = dataset + '/data/dev_Merged1125.txt'                                    # 验证集
-        self.test_path = dataset + '/data/test_Merged1125.txt'                                  # 测试集
+        self.train_path = dataset + '/data/train_Merged1128.txt'                                # 训练集
+        self.dev_path = dataset + '/data/dev_Merged1128.txt'                                    # 验证集
+        self.test_path = dataset + '/data/test_Merged1128.txt'                                  # 测试集
         #self.class_list = [x.strip() for x in open(dataset + '/data/class.txt').readlines()]                                # 类别名单
         self.save_path = dataset + '/saved_dict/' + self.model_name + '.ckpt'        # 模型训练结果
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')   # 设备
 
-        self.require_improvement = 1000                                 # 若超过1000batch效果还没提升，则提前结束训练
+        self.require_improvement = 100000                                 # 若超过100000batch效果还没提升，则提前结束训练
         #self.num_classes = len(self.class_list)                         # 类别数
         self.num_epochs = 1                                             # epoch数
         self.batch_size = 8                                           # mini-batch大小
@@ -28,6 +28,9 @@ class Config(object):
         self.learning_rate = 5e-5                                       # 学习率
         self.bert_path = dataset + '/bert_pretrain'
         self.tokenizer = BertTokenizer.from_pretrained(self.bert_path)
+        self._tree_tools = TreeTools()
+        self.value_to_path_and_nodes_dict = {}
+
         self.hidden_size = 768
         self.tree =\
             ["root", [
@@ -79,6 +82,11 @@ class Config(object):
             "汽车":31
         }
 
+        for path, value in self._tree_tools.get_paths(self.tree):
+            nodes = self._tree_tools.get_nodes(self.tree, path)
+            self.value_to_path_and_nodes_dict[self._tree_tools.label_dict[value]] = path, nodes
+
+
 
 class HierarchicalModel(nn.Module):
 
@@ -92,10 +100,7 @@ class HierarchicalModel(nn.Module):
         self.fc = nn.ModuleList([nn.Linear(config.hidden_size, len(subtree[1])) for subtree in
                                  self._tree_tools.get_subtrees(self.tree)])
 
-        self.value_to_path_and_nodes_dict = {}
-        for path, value in self._tree_tools.get_paths(self.tree):
-            nodes = self._tree_tools.get_nodes(self.tree, path)
-            self.value_to_path_and_nodes_dict[self._tree_tools.label_dict[value]] = path, nodes
+        self.value_to_path_and_nodes_dict = config.value_to_path_and_nodes_dict
 
         self.bert = BertModel.from_pretrained(config.bert_path)
         for param in self.bert.parameters():
@@ -106,33 +111,18 @@ class HierarchicalModel(nn.Module):
         context = x[0]  # 输入的句子
         mask = x[2]  # 对padding部分进行mask，和句子一个size，padding部分用0表示，如：[1, 1, 1, 1, 0, 0]
         _, pooled = self.bert(context, attention_mask=mask, output_all_encoded_layers=False)
-        predicts = list(map(self._get_predicts, pooled, label, [mode]*self.batch_size))
-        losses = list(map(self._get_loss, predicts, label))
-        return losses, predicts
+        predicts_list = list(map(self._get_predicts, pooled, label, [mode]*self.batch_size))
+        predicts = [r[0] for r in predicts_list]
+        predicts_list = [r[1] for r in predicts_list]
+        return predicts, predicts_list
 
-    def _get_loss(self, predicts, label):
-        path, _ = self.value_to_path_and_nodes_dict[int(label.data[1])]
-        criterion = nn.CrossEntropyLoss()
-        if torch.cuda.is_available:
-            criterion = criterion.cuda()
-
-        def f(predict, p):
-            p = torch.LongTensor([p])
-            # convert to cuda tensors if cuda flag is true
-            if torch.cuda.is_available:
-            	p = p.cuda()
-            p = Variable(p)
-            return criterion(predict.unsqueeze(0), p)
-
-        loss = list(map(f, predicts, path))
-        return torch.sum(torch.stack(loss))
 
     def _get_predicts(self, feature, label, mode):
         #label_value = label.cpu().numpy()
         #_, nodes = self.value_to_path_and_nodes_dict[label_value[1]]
         _, nodes = self.value_to_path_and_nodes_dict[int(label.data[1])]
+        predicts_list = []
         if mode == "evl":
-            predicts = list(map(lambda n: self.fc[n](feature), range(self.count_nodes)))
-        else:
-            predicts = list(map(lambda n: self.fc[n](feature), nodes))
-        return predicts
+            predicts_list = list(map(lambda n: self.fc[n](feature), range(self.count_nodes)))
+        predicts = list(map(lambda n: self.fc[n](feature), nodes))
+        return predicts, predicts_list

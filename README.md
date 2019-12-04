@@ -14,25 +14,19 @@ bert_Chinese: 模型 https://s3.amazonaws.com/models.huggingface.co/bert/bert-ba
 来自[这里](https://github.com/huggingface/pytorch-transformers)   
 备用：模型的网盘地址：https://pan.baidu.com/s/1qSAD5gwClq7xlgzl_4W3Pw
 
-ERNIE_Chinese: http://image.nghuyong.top/ERNIE.zip  
-来自[这里](https://github.com/nghuyong/ERNIE-Pytorch)  
-备用：网盘地址：https://pan.baidu.com/s/1lEPdDN1-YQJmKEd_g9rLgw  
-
 解压后，按照上面说的放在对应目录下，文件名称确认无误即可。  
+
+层级分类的softmax参考：https://talbaumel.github.io/blog/softmax/
 
 ## 使用说明
 下载好预训练模型就可以跑了。
 ```
 # 训练并测试：
 # bert
-python run.py --model bert
+python train_evl.py
 
-# bert + 其它
-python run.py --model bert_CNN
 
-# ERNIE
-python run.py --model ERNIE
-```
+
 
 
 
@@ -40,7 +34,9 @@ python run.py --model ERNIE
 
 ## Reference
 [1] 层级分类softmax：https://talbaumel.github.io/blog/softmax/
+
 [2] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
+
 [3] https://github.com/649453932/Bert-Chinese-Text-Classification-Pytorch
 
 

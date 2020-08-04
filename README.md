@@ -19,6 +19,17 @@ From the site you can get a zip file, unzip it and put it in /bert_pretrain.
 
 Hierarchical softmax introduction：https://talbaumel.github.io/blog/softmax/
 
+## Data
+Some samples are loaded:
+
+```
+./data/train.txt
+```
+
+where `train.txt` is a text file containing: title, content, label_level_1, label_level_2.
+By default, the seperatotr is set to `\t`.
+
+
 ## How to use
 Just need to download pretrained files above.
 ```
